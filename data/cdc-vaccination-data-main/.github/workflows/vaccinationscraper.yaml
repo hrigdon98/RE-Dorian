@@ -1,0 +1,26 @@
+on:
+  schedule:
+    - cron: '0 * * * *'
+  push:
+    branches: main
+
+name: Vaccination Scraper
+
+jobs:
+  render:
+    name: Vaccination Scraper
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: r-lib/actions/setup-r@v1
+      - name: Install dependencies
+        run: Rscript -e 'install.packages(c("tidyverse","jsonlite"))'
+      - name: Scrape the data
+        run: Rscript Vaccination_Scraper.R
+      - name: Commit results
+        run: |
+          git add -A
+          timestamp=$(date -u)
+          git commit -m "Latest data: ${timestamp}" || echo "No changes to commit"
+          git push origin || echo "No changes to commit"
+
